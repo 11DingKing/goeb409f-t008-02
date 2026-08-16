@@ -138,7 +138,9 @@ func NewProcess(id string, kind CommandKind, now time.Time, gridLostAt time.Time
 		syncConfirmedAt:   make(map[Party]time.Time),
 		settings:          settings,
 	}
-	if kind == KindReal {
+	// Without a recorded grid-loss instant there is no reference point for the
+	// black-start window, so the command cannot be judged against it.
+	if kind == KindReal && !gridLostAt.IsZero() {
 		p.CommandDeadline = gridLostAt.Add(settings.BlackStartWindow)
 		if now.After(p.CommandDeadline) {
 			p.CommandOverdueRecorded = true
